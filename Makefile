@@ -1,6 +1,8 @@
 TOP_DIR = ../..
 include $(TOP_DIR)/tools/Makefile.common
 
+ABS_BIN_DIR = $(realpath $(BIN_DIR))
+
 DEPLOY_RUNTIME ?= /kb/runtime
 TARGET ?= /kb/deployment
 
@@ -27,13 +29,65 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
 	--define kb_starman_workers=$(STARMAN_WORKERS) \
 	--define kb_starman_max_requests=$(STARMAN_MAX_REQUESTS)
 
-all: bin 
+DEPLOY_VENV = $(TARGET)/libexec/$(CURRENT_DIR)
+
+VENV = prok_tuxedo_venv
+VENV_PATH = $(realpath $(VENV))
+PROK_TUXEDO_SRC = https://github.com/cucinellclark/Prok-tuxedo
+
+BUILD_MULTIQC = $(shell $(VENV_PATH)/bin/python3 -c 'import multiqc; import os.path; print(os.path.dirname(multiqc.__file__))')
+DEPLOY_MULTIQC = $(shell $(DEPLOY_VENV)/bin/python3 -c 'import multiqc; import os.path; print(os.path.dirname(multiqc.__file__))')
+
+all: bin build-local-venv
+
+build-local-venv: local-venv local-multiqc local-prok-tuxedo
+
+local-venv: $(VENV)/bin/pip3
+local-multiqc: $(VENV)/bin/multiqc
+local-prok-tuxedo: $(VENV)/bin/prok_tuxedo.py
+
+$(VENV)/bin/pip3:
+	python3 -mvenv $(VENV)
+
+$(VENV)/bin/multiqc: 
+	$(VENV)/bin/pip install multiqc requests
+
+$(VENV)/bin/prok_tuxedo.py:
+	rm -rf Prok-tuxedo
+	git clone $(PROK_TUXEDO_SRC) Prok-tuxedo
+	for py in Prok-tuxedo/src/*.py ; do \
+		f=`basename $$py`; \
+		(echo "#!$(VENV_PATH)/bin/python3"; cat $$py) > $(ABS_BIN_DIR)/$$f; \
+		chmod +x $(ABS_BIN_DIR)/$$f; \
+	done; \
+	echo "Deploy multiqc files to $(BUILD_MULTIQC)"
+
+deploy-local-venv: deploy-venv deploy-multiqc deploy-prok-tuxedo
+deploy-venv: $(DEPLOY_VENV)/bin/pip3
+deploy-multiqc: $(DEPLOY_VENV)/bin/multiqc
+deploy-prok-tuxedo: $(DEPLOY_VENV)/bin/prok_tuxedo.py
+
+$(DEPLOY_VENV)/bin/pip3:
+	python3 -mvenv $(DEPLOY_VENV)
+
+$(DEPLOY_VENV)/bin/multiqc: 
+	$(DEPLOY_VENV)/bin/pip install multiqc
+
+$(DEPLOY_VENV)/bin/prok_tuxedo.py:
+	rm -rf Prok-tuxedo
+	git clone $(PROK_TUXEDO_SRC) Prok-tuxedo
+	for py in Prok-tuxedo/src/*.py ; do \
+		f=`basename $$py`; \
+		(echo "#!$(DEPLOY_VENV)/bin/python3"; cat $$py) > $(TARGET)/bin/$$f; \
+		chmod +x $(TARGET)/bin/$$f; \
+	done; \
+	echo "Deploy multiqc files to $(DEPLOY_MULTIQC)"
 
 bin: $(BIN_PERL) $(BIN_SERVICE_PERL)
 
-deploy: deploy-all
+deploy: deploy-all 
 deploy-all: deploy-client 
-deploy-client: deploy-libs deploy-scripts deploy-docs
+deploy-client: deploy-libs deploy-scripts deploy-docs deploy-local-venv
 
 deploy-service: deploy-libs deploy-scripts deploy-service-scripts deploy-specs
 
