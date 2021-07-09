@@ -7,3 +7,5 @@ Wrapper for the prok_tuxedo repo:
  * Check out prok-tuxedo
  * Install prok-tuxedo into the venv
  * Install the multiqc additions into the venv
+
+
