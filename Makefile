@@ -44,15 +44,15 @@ build-local-venv: local-venv local-multiqc local-prok-tuxedo
 
 local-venv: $(VENV)/bin/pip3
 local-multiqc: $(VENV)/bin/multiqc
-local-prok-tuxedo: $(VENV)/bin/prok_tuxedo.py
+local-prok-tuxedo: $($(ABS_BIN_DIR)/prok_tuxedo.py
 
 $(VENV)/bin/pip3:
 	python3 -mvenv $(VENV)
 
 $(VENV)/bin/multiqc: 
-	$(VENV)/bin/pip install multiqc requests
+	$(VENV)/bin/pip install multiqc
 
-$(VENV)/bin/prok_tuxedo.py:
+$(ABS_BIN_DIR)/prok_tuxedo.py:
 	rm -rf Prok-tuxedo
 	git clone $(PROK_TUXEDO_SRC) Prok-tuxedo
 	for py in Prok-tuxedo/src/*.py ; do \
@@ -65,7 +65,7 @@ $(VENV)/bin/prok_tuxedo.py:
 deploy-local-venv: deploy-venv deploy-multiqc deploy-prok-tuxedo
 deploy-venv: $(DEPLOY_VENV)/bin/pip3
 deploy-multiqc: $(DEPLOY_VENV)/bin/multiqc
-deploy-prok-tuxedo: $(DEPLOY_VENV)/bin/prok_tuxedo.py
+deploy-prok-tuxedo: $(TARGET)/bin/prok_tuxedo.py
 
 $(DEPLOY_VENV)/bin/pip3:
 	python3 -mvenv $(DEPLOY_VENV)
@@ -73,7 +73,7 @@ $(DEPLOY_VENV)/bin/pip3:
 $(DEPLOY_VENV)/bin/multiqc: 
 	$(DEPLOY_VENV)/bin/pip install multiqc
 
-$(DEPLOY_VENV)/bin/prok_tuxedo.py:
+$(TARGET)/bin/prok_tuxedo.py:
 	rm -rf Prok-tuxedo
 	git clone $(PROK_TUXEDO_SRC) Prok-tuxedo
 	for py in Prok-tuxedo/src/*.py ; do \
