@@ -61,6 +61,14 @@ $(VENV)/bin/prok_tuxedo.py:
 		chmod +x $(ABS_BIN_DIR)/$$f; \
 	done; \
 	echo "Deploy multiqc files to $(BUILD_MULTIQC)"
+	for mod_dir in Prok-tuxedo/lib/Multiqc/modules/* ; do \
+		mode_name=`basename $$mod_dir`; \	
+		mkdir $(BUILD_MULTIQC)/modules/$$mod_name; \	
+		cp $$mod_dir/* $(BUILD_MULTIQC)/modules/$$mod_name; \
+	done; \
+	multiqc_version=$(shell $(VENV_PATH)/bin/python3 -c 'import multiqc; print(multiqc.__version__)')
+	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(BUILD_MULTIQC)-$${multiqc_version}.dist.info/ 
+	cp Prok-tuxedo/lib/Multiqc/utils/search_patterns.yaml $(BUILD_MULTIQC)/utils/
 
 deploy-local-venv: deploy-venv deploy-multiqc deploy-prok-tuxedo
 deploy-venv: $(DEPLOY_VENV)/bin/pip3
@@ -82,6 +90,15 @@ $(DEPLOY_VENV)/bin/prok_tuxedo.py:
 		chmod +x $(TARGET)/bin/$$f; \
 	done; \
 	echo "Deploy multiqc files to $(DEPLOY_MULTIQC)"
+	for mod_dir in Prok-tuxedo/lib/Multiqc/modules/* ; do \
+		mode_name=`basename $$mod_dir`; \	
+		mkdir $(DEPLOY_MULTIQC)/modules/$$mod_name; \	
+		cp $$mod_dir/* $(DEPLOY_MULTIQC)/modules/$$mod_name; \
+	done; \
+	multiqc_version=$(shell $(VENV_PATH)/bin/python3 -c 'import multiqc; print(multiqc.__version__)')
+	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(DEPLOY_MULTIQC)-$${multiqc_version}.dist.info/ 
+	cp Prok-tuxedo/lib/Multiqc/utils/search_patterns.yaml $(DEPLOY_MULTIQC)/utils/
+
 
 bin: $(BIN_PERL) $(BIN_SERVICE_PERL)
 
