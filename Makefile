@@ -71,6 +71,10 @@ $(ABS_BIN_DIR)/prok_tuxedo.py:
 	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(BUILD_MULTIQC)-$${multiqc_version}.dist-info/
 	cp Prok-tuxedo/lib/Multiqc/utils/search_patterns.yaml $(BUILD_MULTIQC)/utils/
 
+SRC_R = $(wildcard Prok-tuxedo/src/*.R)
+BIN_R = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_R))))
+DEPLOY_R = $(addprefix $(TARGET)/bin/,$(basename $(notdir $(SRC_R))))
+
 deploy-local-venv: deploy-venv deploy-multiqc deploy-prok-tuxedo
 deploy-venv: $(DEPLOY_VENV)/bin/pip3
 deploy-multiqc: $(DEPLOY_VENV)/bin/multiqc
@@ -101,8 +105,7 @@ $(TARGET)/bin/prok_tuxedo.py:
 	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(DEPLOY_MULTIQC)-$${multiqc_version}.dist-info/ 
 	cp Prok-tuxedo/lib/Multiqc/utils/search_patterns.yaml $(DEPLOY_MULTIQC)/utils/
 
-
-bin: $(BIN_PERL) $(BIN_SERVICE_PERL)
+bin: $(BIN_PERL) $(BIN_SERVICE_PERL) $(BIN_R)
 
 deploy: deploy-all 
 deploy-all: deploy-client 
