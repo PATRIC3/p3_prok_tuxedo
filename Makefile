@@ -48,6 +48,7 @@ local-prok-tuxedo: $(ABS_BIN_DIR)/prok_tuxedo.py
 
 $(VENV)/bin/pip3:
 	python3 -mvenv $(VENV)
+	$(VENV)/bin/pip install pandas
 
 $(VENV)/bin/multiqc: 
 	$(VENV)/bin/pip install multiqc
@@ -78,6 +79,7 @@ deploy-prok-tuxedo: $(TARGET)/bin/prok_tuxedo.py
 
 $(DEPLOY_VENV)/bin/pip3:
 	python3 -mvenv $(DEPLOY_VENV)
+	$(DEPLOY_VENV)/bin/pip install pandas
 
 $(DEPLOY_VENV)/bin/multiqc: 
 	$(DEPLOY_VENV)/bin/pip install multiqc
@@ -111,8 +113,10 @@ deploy-client: deploy-libs deploy-scripts deploy-docs deploy-local-venv
 deploy-service: deploy-libs deploy-scripts deploy-service-scripts deploy-specs
 
 deploy-specs:
-	mkdir -p $(TARGET)/services/$(APP_SERVICE)
-	rsync -arv app_specs $(TARGET)/services/$(APP_SERVICE)/.
+	if [[ -d app_specs ]] ; then \
+		mkdir -p $(TARGET)/services/$(APP_SERVICE);  \
+		rsync -arv app_specs $(TARGET)/services/$(APP_SERVICE)/.; \
+	fi
 
 deploy-service-scripts:
 	export KB_TOP=$(TARGET); \
