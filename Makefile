@@ -67,6 +67,7 @@ $(ABS_BIN_DIR)/prok_tuxedo.py:
 		mkdir -p $(BUILD_MULTIQC)/modules/$$mod_name; \
 		cp -r $$mod_dir/* $(BUILD_MULTIQC)/modules/$$mod_name; \
 	done; 
+	cp Prok-tuxedo/lib/Multiqc/BV_BRC.png $(BUILD_MULTIQC)
 	multiqc_version=`$(VENV_PATH)/bin/python3 -c 'import multiqc; print(multiqc.__version__.split()[0])'`; \
 	echo "version=$$multiqc_version"; \
 	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(BUILD_MULTIQC)-$${multiqc_version}.dist-info/
@@ -102,6 +103,7 @@ $(TARGET)/bin/prok_tuxedo.py:
 		mkdir -p $(DEPLOY_MULTIQC)/modules/$$mod_name; \
 		cp $$mod_dir/* $(DEPLOY_MULTIQC)/modules/$$mod_name; \
 	done;
+	cp Prok-tuxedo/lib/Multiqc/BV_BRC.png $(DEPLOY_MULTIQC)
 	multiqc_version=$(shell $(DEPLOY_VENV)/bin/python3 -c 'import multiqc; print(multiqc.__version__.split()[0])'); \
 	echo "version=$$multiqc_version"; \
 	cp Prok-tuxedo/lib/Multiqc/entry_points.txt $(DEPLOY_MULTIQC)-$${multiqc_version}.dist-info/ 
